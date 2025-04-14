@@ -60,10 +60,15 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     await feedbackRef.set(feedback);
 
-    return { success: true, feedbackId: feedbackRef.id };
+    return {
+      success: true,
+      feedbackId: feedbackRef.id,
+    };
   } catch (error) {
     console.error('Error saving feedback:', error);
-    return { success: false };
+    return {
+      success: false,
+    };
   }
 }
 
@@ -96,11 +101,19 @@ export async function getLatestInterviews(
 ): Promise<Interview[] | null> {
   const { userId, limit = 20 } = params;
 
+  // const interviews = await db
+  //   .collection('interviews')
+  //   .orderBy('createdAt', 'desc')
+  //   .where('finalized', '==', true)
+  //   .where('userId', '!=', userId)
+  //   .limit(limit)
+  //   .get();
   const interviews = await db
     .collection('interviews')
-    .orderBy('createdAt', 'desc')
     .where('finalized', '==', true)
     .where('userId', '!=', userId)
+    .orderBy('userId') // First ordering must match the inequality filter field.
+    .orderBy('createdAt', 'desc') // Secondary ordering by createdAt.
     .limit(limit)
     .get();
 
