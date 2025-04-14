@@ -147,6 +147,12 @@ export async function getLatestInterviews(
       .limit(limit)
       .get();
 
+    console.log('interviews by userId', interviews);
+    console.log(
+      'interviews data by userId',
+      interviews.docs.map((doc) => doc.data())
+    );
+
     return interviews.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
