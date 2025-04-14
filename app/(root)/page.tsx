@@ -18,7 +18,6 @@ async function Home() {
     return <SignInPage />;
   }
 
-  console.log('user', user);
   // Now we can safely use user.id because we've confirmed user exists
   const [userInterviews, allInterview] = await Promise.all([
     getInterviewsByUserId(user.id),
@@ -31,6 +30,9 @@ async function Home() {
 
   return (
     <>
+      {console.log('upcoming interviews', hasUpcomingInterviews)}
+      {console.log('user', user)}
+      {console.log('upcoming all interviews', allInterview)}
       <section className='card-cta'>
         <div className='flex flex-col gap-6 max-w-lg'>
           <h2>Get Interview-Ready with AI-Powered Practice & Feedback</h2>

@@ -119,30 +119,17 @@ export async function getInterviewsByUserId(
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
-  const { userId, limit = 20 } = params;
+  const {
+    // userId,
+    limit = 20,
+  } = params;
 
   try {
     // Return all interviews if userId is undefined
     // if (!userId) {
-    //   const interviews = await db
-    //     .collection('interviews')
-    //     .where('finalized', '==', true)
-    //     .orderBy('createdAt', 'desc')
-    //     .limit(limit)
-    //     .get();
-
-    //   return interviews.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   })) as Interview[];
-    // }
-
-    // Use the composite index query when userId is available
     const interviews = await db
       .collection('interviews')
       .where('finalized', '==', true)
-      .where('userId', '!=', userId)
-      .orderBy('userId')
       .orderBy('createdAt', 'desc')
       .limit(limit)
       .get();
@@ -157,6 +144,28 @@ export async function getLatestInterviews(
       id: doc.id,
       ...doc.data(),
     })) as Interview[];
+    // }
+
+    // Use the composite index query when userId is available
+    // const interviews = await db
+    //   .collection('interviews')
+    //   .where('finalized', '==', true)
+    //   .where('userId', '!=', userId)
+    //   .orderBy('userId')
+    //   .orderBy('createdAt', 'desc')
+    //   .limit(limit)
+    //   .get();
+
+    // console.log('interviews by userId', interviews);
+    // console.log(
+    //   'interviews data by userId',
+    //   interviews.docs.map((doc) => doc.data())
+    // );
+
+    /* return interviews.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Interview[]; */
   } catch (error) {
     console.error('Error fetching interviews:', error);
     return [];
