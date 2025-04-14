@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   typescrpipt: {
     ignoreBuildErrors: true,
+    ignoreUndefinedProperties: true,
   },
 };
 

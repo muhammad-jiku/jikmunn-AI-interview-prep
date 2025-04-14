@@ -94,27 +94,68 @@ export async function getFeedbackByInterviewId(
   return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
 }
 
-// Option 1: Using composite index (recommended)
+// // Option 1: Using composite index (recommended)
+// export async function getLatestInterviews(
+//   params: GetLatestInterviewsParams
+// ): Promise<Interview[] | null> {
+//   const { userId, limit = 20 } = params;
+
+//   // This query requires a composite index, which you should create via
+//   // the link in the error message or the Firebase console
+//    const interviews = await db
+//     .collection('interviews')
+//     .where('finalized', '==', true)
+//      .where('userId', '!=', userId)
+//     .orderBy('userId') // First ordering must match the inequality filter field
+//     .orderBy('createdAt', 'desc') // Secondary ordering by createdAt
+//      .limit(limit)
+//      .get();
+
+//   return interviews.docs.map((doc) => ({
+//      id: doc.id,
+//     ...doc.data(),
+//    })) as Interview[];
+//    }
+
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
   const { userId, limit = 20 } = params;
 
-  // This query requires a composite index, which you should create via
-  // the link in the error message or the Firebase console
-  const interviews = await db
-    .collection('interviews')
-    .where('finalized', '==', true)
-    .where('userId', '!=', userId)
-    .orderBy('userId') // First ordering must match the inequality filter field
-    .orderBy('createdAt', 'desc') // Secondary ordering by createdAt
-    .limit(limit)
-    .get();
+  try {
+    // If userId is undefined, just get recent interviews without the filter
+    if (!userId) {
+      const interviews = await db
+        .collection('interviews')
+        .where('finalized', '==', true)
+        .orderBy('createdAt', 'desc')
+        .limit(limit)
+        .get();
 
-  return interviews.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Interview[];
+      return interviews.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Interview[];
+    }
+
+    // Original query with userId filter
+    const interviews = await db
+      .collection('interviews')
+      .where('finalized', '==', true)
+      .where('userId', '!=', userId)
+      .orderBy('userId')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+
+    return interviews.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Interview[];
+  } catch (error) {
+    console.error('Error fetching interviews:', error);
+    return [];
+  }
 }
 
 // Option 2: Alternative implementation without composite index
