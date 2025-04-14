@@ -34,7 +34,7 @@ export const getTechLogos = async (techArray: string[]) => {
   const results = await Promise.all(
     logoURLs.map(async ({ tech, url }) => ({
       tech,
-      url: (await checkIconExists(url)) ? url : '/tech.svg',
+      url: (await checkIconExists(url)) ? url : '/icons/tech.svg',
     }))
   );
 
