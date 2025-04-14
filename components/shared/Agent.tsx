@@ -31,7 +31,7 @@ const Agent = ({
   const router = useRouter();
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [lastMessage, setLastMessage] = useState<string>('');
 
   useEffect(() => {
