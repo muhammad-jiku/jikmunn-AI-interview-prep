@@ -17,8 +17,6 @@ export async function createFeedback(params: CreateFeedbackParams) {
       .join('');
 
     const { object } = await generateObject({
-      //   model: google('gemini-2.0-flash-001', {
-      // model: google('models/gemini-2.0-flash-exp', {
       model: google('gemini-2.0-flash-exp', {
         structuredOutputs: false,
       }),
@@ -96,24 +94,20 @@ export async function getFeedbackByInterviewId(
   return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
 }
 
+// Option 1: Using composite index (recommended)
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
   const { userId, limit = 20 } = params;
 
-  // const interviews = await db
-  //   .collection('interviews')
-  //   .orderBy('createdAt', 'desc')
-  //   .where('finalized', '==', true)
-  //   .where('userId', '!=', userId)
-  //   .limit(limit)
-  //   .get();
+  // This query requires a composite index, which you should create via
+  // the link in the error message or the Firebase console
   const interviews = await db
     .collection('interviews')
     .where('finalized', '==', true)
     .where('userId', '!=', userId)
-    .orderBy('userId') // First ordering must match the inequality filter field.
-    .orderBy('createdAt', 'desc') // Secondary ordering by createdAt.
+    .orderBy('userId') // First ordering must match the inequality filter field
+    .orderBy('createdAt', 'desc') // Secondary ordering by createdAt
     .limit(limit)
     .get();
 
@@ -122,6 +116,34 @@ export async function getLatestInterviews(
     ...doc.data(),
   })) as Interview[];
 }
+
+// Option 2: Alternative implementation without composite index
+// Uncomment and use this if you cannot create the composite index immediately
+/*
+export async function getLatestInterviews(
+  params: GetLatestInterviewsParams
+): Promise<Interview[] | null> {
+  const { userId, limit = 20 } = params;
+
+  // Get finalized interviews, sorted by createdAt
+  const interviews = await db
+    .collection('interviews')
+    .where('finalized', '==', true)
+    .orderBy('createdAt', 'desc')
+    .limit(limit * 2) // Fetch more to allow for filtering
+    .get();
+
+  // Filter out the current user's interviews in application code
+  const filteredInterviews = interviews.docs
+    .filter(doc => doc.data().userId !== userId)
+    .slice(0, limit);
+
+  return filteredInterviews.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Interview[];
+}
+*/
 
 export async function getInterviewsByUserId(
   userId: string
