@@ -116,7 +116,7 @@ export async function getFeedbackByInterviewId(
 //     ...doc.data(),
 //    })) as Interview[];
 //    }
-
+/* 
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
@@ -156,7 +156,7 @@ export async function getLatestInterviews(
     console.error('Error fetching interviews:', error);
     return [];
   }
-}
+} */
 
 // Option 2: Alternative implementation without composite index
 // Uncomment and use this if you cannot create the composite index immediately
@@ -186,9 +186,27 @@ export async function getLatestInterviews(
 }
 */
 
+// export async function getInterviewsByUserId(
+//   userId: string
+// ): Promise<Interview[] | null> {
+//   const interviews = await db
+//     .collection('interviews')
+//     .where('userId', '==', userId)
+//     .orderBy('createdAt', 'desc')
+//     .get();
+
+//   return interviews.docs.map((doc) => ({
+//     id: doc.id,
+//     ...doc.data(),
+//   })) as Interview[];
+// }
+
 export async function getInterviewsByUserId(
-  userId: string
+  userId: string | undefined
 ): Promise<Interview[] | null> {
+  // Return empty array if userId is undefined
+  if (!userId) return [];
+
   const interviews = await db
     .collection('interviews')
     .where('userId', '==', userId)
@@ -199,4 +217,45 @@ export async function getInterviewsByUserId(
     id: doc.id,
     ...doc.data(),
   })) as Interview[];
+}
+
+export async function getLatestInterviews(
+  params: GetLatestInterviewsParams
+): Promise<Interview[] | null> {
+  const { userId, limit = 20 } = params;
+
+  try {
+    // Return all interviews if userId is undefined
+    if (!userId) {
+      const interviews = await db
+        .collection('interviews')
+        .where('finalized', '==', true)
+        .orderBy('createdAt', 'desc')
+        .limit(limit)
+        .get();
+
+      return interviews.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Interview[];
+    }
+
+    // Use the composite index query when userId is available
+    const interviews = await db
+      .collection('interviews')
+      .where('finalized', '==', true)
+      .where('userId', '!=', userId)
+      .orderBy('userId')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+
+    return interviews.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Interview[];
+  } catch (error) {
+    console.error('Error fetching interviews:', error);
+    return [];
+  }
 }
