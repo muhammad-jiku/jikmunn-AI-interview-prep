@@ -72,6 +72,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
 export async function getInterviewById(id: string): Promise<Interview | null> {
   const interview = await db.collection('interviews').doc(id).get();
+  console.log('interview by id', interview);
+  console.log('interview data by id', interview.data());
 
   return interview.data() as Interview | null;
 }
@@ -105,6 +107,8 @@ export async function getInterviewsByUserId(
     .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
     .get();
+
+  console.log('interviews by userId', interviews);
 
   return interviews.docs.map((doc) => ({
     id: doc.id,
