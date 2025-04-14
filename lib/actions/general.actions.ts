@@ -123,19 +123,19 @@ export async function getLatestInterviews(
 
   try {
     // Return all interviews if userId is undefined
-    if (!userId) {
-      const interviews = await db
-        .collection('interviews')
-        .where('finalized', '==', true)
-        .orderBy('createdAt', 'desc')
-        .limit(limit)
-        .get();
+    // if (!userId) {
+    //   const interviews = await db
+    //     .collection('interviews')
+    //     .where('finalized', '==', true)
+    //     .orderBy('createdAt', 'desc')
+    //     .limit(limit)
+    //     .get();
 
-      return interviews.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Interview[];
-    }
+    //   return interviews.docs.map((doc) => ({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   })) as Interview[];
+    // }
 
     // Use the composite index query when userId is available
     const interviews = await db

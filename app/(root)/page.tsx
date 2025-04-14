@@ -18,6 +18,7 @@ async function Home() {
     return <SignInPage />;
   }
 
+  console.log('user', user);
   // Now we can safely use user.id because we've confirmed user exists
   const [userInterviews, allInterview] = await Promise.all([
     getInterviewsByUserId(user.id),
