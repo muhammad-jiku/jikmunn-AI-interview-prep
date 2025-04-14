@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# firebase files (
+/firebase/jikmunn-ai-interview-prep-firebase-adminsdk-fbsvc-daa2f6ef82.json
+
 # vercel
 .vercel
 
