@@ -116,69 +116,107 @@ export async function getInterviewsByUserId(
   })) as Interview[];
 }
 
+// export async function getLatestInterviews(
+//   params: GetLatestInterviewsParams
+// ): Promise<Interview[] | null> {
+//   const { userId, limit = 20 } = params;
+
+//   try {
+//     // Return all interviews if userId is undefined
+//     if (!userId) {
+//       const interviews = await db
+//         .collection('interviews')
+//         .where('finalized', '==', true)
+//         .orderBy('createdAt', 'desc')
+//         .limit(limit)
+//         .get();
+
+//       console.log('interviews by userId', interviews);
+//       console.log(
+//         'interviews data by userId',
+//         interviews.docs.map((doc) => doc.data())
+//       );
+
+//       return interviews.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       })) as Interview[];
+//     }
+
+//     // Use the composite index query when userId is available
+//     const interviews = await db
+//       .collection('interviews')
+//       .where('finalized', '==', true)
+//       .where('userId', '!=', userId)
+//       .orderBy('userId')
+//       .orderBy('createdAt', 'desc')
+//       .limit(limit)
+//       .get();
+
+//     console.log('interviews by userId', interviews);
+//     console.log(
+//       'interviews data by userId',
+//       interviews.docs.map((doc) => doc.data())
+//     );
+
+//     return interviews.docs.map((doc) => ({
+//       id: doc.id,
+//       ...doc.data(),
+//     })) as Interview[];
+//   } catch (error) {
+//     console.error('Error fetching interviews:', error);
+//     return [];
+//   }
+
+//   // const interviews = await db
+//   //   .collection('interviews')
+//   //   .where('finalized', '==', true)
+//   //   .where('userId', '!=', userId)
+//   //   .orderBy('userId')
+//   //   .orderBy('createdAt', 'desc')
+//   //   .limit(limit)
+//   //   .get();
+
+//   // return interviews.docs.map((doc) => ({
+//   //   id: doc.id,
+//   //   ...doc.data(),
+//   // })) as Interview[];
+// }
+
 export async function getLatestInterviews(
   params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
   const { userId, limit = 20 } = params;
 
   try {
-    // Return all interviews if userId is undefined
-    if (!userId) {
-      const interviews = await db
-        .collection('interviews')
-        .where('finalized', '==', true)
-        .orderBy('createdAt', 'desc')
-        .limit(limit)
-        .get();
-
-      console.log('interviews by userId', interviews);
-      console.log(
-        'interviews data by userId',
-        interviews.docs.map((doc) => doc.data())
-      );
-
-      return interviews.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Interview[];
-    }
-
-    // Use the composite index query when userId is available
+    // Simpler query that should work with automatic indexes
     const interviews = await db
       .collection('interviews')
       .where('finalized', '==', true)
-      .where('userId', '!=', userId)
-      .orderBy('userId')
       .orderBy('createdAt', 'desc')
       .limit(limit)
       .get();
 
-    console.log('interviews by userId', interviews);
-    console.log(
-      'interviews data by userId',
-      interviews.docs.map((doc) => doc.data())
+    // Map and properly type the documents before filtering
+    const mappedInterviews = interviews.docs.map((doc) => {
+      // Use type assertion to tell TypeScript that doc.data() returns an object matching your Interview type
+      // (minus the id field which we're adding separately)
+      const data = doc.data() as Omit<Interview, 'id'>;
+
+      return {
+        id: doc.id,
+        ...data,
+      } as Interview; // This ensures the complete object is typed as Interview
+    });
+
+    // Now TypeScript knows each item has userId and other Interview properties
+    const filteredInterviews = mappedInterviews.filter((interview) =>
+      userId ? interview.userId !== userId : true
     );
 
-    return interviews.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Interview[];
+    return filteredInterviews;
   } catch (error) {
     console.error('Error fetching interviews:', error);
     return [];
   }
-
-  // const interviews = await db
-  //   .collection('interviews')
-  //   .where('finalized', '==', true)
-  //   .where('userId', '!=', userId)
-  //   .orderBy('userId')
-  //   .orderBy('createdAt', 'desc')
-  //   .limit(limit)
-  //   .get();
-
-  // return interviews.docs.map((doc) => ({
-  //   id: doc.id,
-  //   ...doc.data(),
-  // })) as Interview[];
 }

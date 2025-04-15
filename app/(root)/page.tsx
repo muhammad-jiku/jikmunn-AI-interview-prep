@@ -25,8 +25,10 @@ async function Home() {
   ]);
 
   // Use optional chaining with fallback instead of non-null assertion
-  const hasPastInterviews = userInterviews!.length > 0 || false;
-  const hasUpcomingInterviews = allInterview!.length > 0 || false;
+  // const hasPastInterviews = userInterviews!.length > 0 || false;
+  // const hasUpcomingInterviews = allInterview!.length > 0 || false;
+  const hasPastInterviews = userInterviews && userInterviews.length > 0;
+  const hasUpcomingInterviews = allInterview && allInterview.length > 0;
 
   return (
     <>
