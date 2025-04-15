@@ -172,6 +172,7 @@ export async function getLatestInterviews(
     .collection('interviews')
     .where('finalized', '==', true)
     .where('userId', '!=', userId)
+    .orderBy('userId')
     .orderBy('createdAt', 'desc')
     .limit(limit)
     .get();
